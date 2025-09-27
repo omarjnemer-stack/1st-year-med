@@ -129,7 +129,7 @@
         flex-wrap: wrap;
     }
 
-    input {
+    input, select {
         padding: 18px 30px;
         font-size: 1.3rem;
         border: 2px solid transparent;
@@ -143,7 +143,17 @@
         box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
 
-    input:focus {
+    select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: left 20px center;
+        background-repeat: no-repeat;
+        background-size: 16px 12px;
+        padding-left: 50px;
+    }
+
+    input:focus, select:focus {
         outline: none;
         transform: translateY(-3px) scale(1.02);
         box-shadow: 0 15px 40px rgba(0,0,0,0.2);
@@ -457,11 +467,15 @@
             padding: 35px 25px;
         }
         
-        input {
+        input, select {
             width: 100%;
             margin-bottom: 20px;
             font-size: 1.2rem;
             padding: 16px 25px;
+        }
+        
+        select {
+            padding-left: 45px;
         }
         
         button {
@@ -504,16 +518,25 @@
 <body>
     <div class="header">
         <div class="logo"></div>
-        <h1 style="color: purple;">🎓 نظام الجدول الدراسي</h1>
+        <h1 style="color: purple;">🎓 نظام الجدول الدراسي لموديول الفاونديشن</h1>
         <p style="color: purple;">✨ اكتشف مواعيد محاضراتك ومختبراتك</p>
     </div>
 
 ```
 <div class="container">
     <div class="input-section">
-        <h2>🔍 أدخل رقمك الجامعي للحصول على جدولك الشخصي</h2>
+        <h2>🔍 أدخل رقمك الجامعي واختر الأسبوع للحصول على جدولك الشخصي</h2>
         <div class="input-group">
             <input type="text" id="studentNumber" placeholder="مثال: ١٢٣٤" minlength="1" maxlength="4">
+            <select id="weekSelect">
+                <option value="1">📅 الأسبوع الأول</option>
+                <option value="2">📅 الأسبوع الثاني</option>
+                <option value="3">📅 الأسبوع الثالث</option>
+                <option value="4">📅 الأسبوع الرابع</option>
+                <option value="5">📅 الأسبوع الخامس</option>
+                <option value="6">📅 الأسبوع السادس</option>
+                <option value="7">📅 الأسبوع السابع</option>
+            </select>
             <button onclick="getSchedule()" id="searchBtn">
                 🚀 عرض الجدول
             </button>
@@ -604,8 +627,22 @@
         btn.disabled = false;
     }
 
+    function getWeekName(weekNumber) {
+        const weekNames = {
+            '1': 'الأسبوع الأول',
+            '2': 'الأسبوع الثاني', 
+            '3': 'الأسبوع الثالث',
+            '4': 'الأسبوع الرابع',
+            '5': 'الأسبوع الخامس',
+            '6': 'الأسبوع السادس',
+            '7': 'الأسبوع السابع'
+        };
+        return weekNames[weekNumber] || 'الأسبوع الأول';
+    }
+
     function getSchedule() {
         const inputValue = document.getElementById('studentNumber').value;
+        const selectedWeek = document.getElementById('weekSelect').value;
         const convertedValue = convertFromArabicNumbers(inputValue);
         const number = parseInt(convertedValue);
         const resultDiv = document.getElementById('result');
@@ -628,117 +665,136 @@
             const hall = getHall(group);
             const labSchedule = getLabSchedule(section);
 
-            let html = `
-                <div class="student-info">
-                    <h3>🎯 معلومات الطالب رقم ${number}</h3>
-                    <p><strong>المجموعة:</strong> ${group} | <strong>السكشن:</strong> ${section}</p>
-                </div>
+            let html = '';
 
-                <div class="schedule-section lab-section">
-                    <div class="section-title">
-                        🧪 جدول المختبرات العملية
+            // التحقق من الأسبوع المختار
+            if (selectedWeek === '1') {
+                // عرض بيانات الأسبوع الأول
+                html = `
+                    <div class="student-info">
+                        <h3>🎯 معلومات الطالب رقم ${number}</h3>
+                        <p><strong>المجموعة:</strong> ${group} | <strong>السكشن:</strong> ${section} | <strong>الأسبوع:</strong> الأول</p>
                     </div>
-                    <div class="schedule-grid">
-                        <div class="schedule-day">
-                            <div class="day-title">📅 ${labSchedule.day}</div>
-                            <div class="lecture">
-                                <span class="lecture-name">🔬 مختبر المجموعة ${section} - تجارب عملية تطبيقية</span>
-                                <div class="time-location">
-                                    <span class="time">${labSchedule.time}</span>
-                                    <span class="location">🏢 Lab 9</span>
+
+                    <div class="schedule-section lab-section">
+                        <div class="section-title">
+                            🧪 جدول المختبرات العملية
+                        </div>
+                        <div class="schedule-grid">
+                            <div class="schedule-day">
+                                <div class="day-title">📅 ${labSchedule.day}</div>
+                                <div class="lecture">
+                                    <span class="lecture-name">🔬 مختبر المجموعة ${section} - تجارب عملية تطبيقية</span>
+                                    <div class="time-location">
+                                        <span class="time">${labSchedule.time}</span>
+                                        <span class="location">🏢 Lab 9</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="schedule-section">
-                    <div class="section-title">
-                        📚 جدول المحاضرات النظرية
+                    <div class="schedule-section">
+                        <div class="section-title">
+                            📚 جدول المحاضرات النظرية
+                        </div>
+                        <div class="schedule-grid">
+                            <div class="schedule-day">
+                                <div class="day-title">📅 الثلاثاء 30/9/2025</div>
+                                <div class="lecture">
+                                    <span class="lecture-name">🧬 Carbohydrate Structure 1 (Biochemistry 1)</span>
+                                    <div class="time-location">
+                                        <span class="time">8–9</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                                <div class="lecture">
+                                    <span class="lecture-name">🔬 Cell Membrane Structure (Histology 1)</span>
+                                    <div class="time-location">
+                                        <span class="time">9–10</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                                <div class="lecture">
+                                    <span class="lecture-name">⚡ Membrane Transport 1 (Physiology 1)</span>
+                                    <div class="time-location">
+                                        <span class="time">10–11</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="schedule-day">
+                                <div class="day-title">📅 الأربعاء 1/10/2025</div>
+                                <div class="lecture">
+                                    <span class="lecture-name">📦 Vesicular Transport (Histology 2)</span>
+                                    <div class="time-location">
+                                        <span class="time">8–9</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                                <div class="lecture">
+                                    <span class="lecture-name">🔄 Membrane Transport 2 (Physiology 2)</span>
+                                    <div class="time-location">
+                                        <span class="time">9–10</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                                <div class="lecture">
+                                    <span class="lecture-name">🍯 Carbohydrate Structure 2 (Biochemistry 2)</span>
+                                    <div class="time-location">
+                                        <span class="time">10–11</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="schedule-day">
+                                <div class="day-title">📅 الخميس 2/10/2025</div>
+                                <div class="lecture">
+                                    <span class="lecture-name">🏭 Cell Organelles 1 (Histology 3)</span>
+                                    <div class="time-location">
+                                        <span class="time">8–9</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                                <div class="lecture">
+                                    <span class="lecture-name">🎯 Functional Organization of Human Body (Physiology 3)</span>
+                                    <div class="time-location">
+                                        <span class="time">9–10</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                                <div class="lecture">
+                                    <span class="lecture-name">⚖️ Homeostasis (Physiology 4)</span>
+                                    <div class="time-location">
+                                        <span class="time">10–11</span>
+                                        <span class="location">🏢 ${hall}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="schedule-grid">
-                        <div class="schedule-day">
-                            <div class="day-title">📅 الثلاثاء 30/9/2025</div>
-                            <div class="lecture">
-                                <span class="lecture-name">🧬 Carbohydrate Structure 1 (Biochemistry 1)</span>
-                                <div class="time-location">
-                                    <span class="time">8–9</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                            <div class="lecture">
-                                <span class="lecture-name">🔬 Cell Membrane Structure (Histology 1)</span>
-                                <div class="time-location">
-                                    <span class="time">9–10</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                            <div class="lecture">
-                                <span class="lecture-name">⚡ Membrane Transport 1 (Physiology 1)</span>
-                                <div class="time-location">
-                                    <span class="time">10–11</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="schedule-day">
-                            <div class="day-title">📅 الأربعاء 1/10/2025</div>
-                            <div class="lecture">
-                                <span class="lecture-name">📦 Vesicular Transport (Histology 2)</span>
-                                <div class="time-location">
-                                    <span class="time">8–9</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                            <div class="lecture">
-                                <span class="lecture-name">🔄 Membrane Transport 2 (Physiology 2)</span>
-                                <div class="time-location">
-                                    <span class="time">9–10</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                            <div class="lecture">
-                                <span class="lecture-name">🍯 Carbohydrate Structure 2 (Biochemistry 2)</span>
-                                <div class="time-location">
-                                    <span class="time">10–11</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="schedule-day">
-                            <div class="day-title">📅 الخميس 2/10/2025</div>
-                            <div class="lecture">
-                                <span class="lecture-name">🏭 Cell Organelles 1 (Histology 3)</span>
-                                <div class="time-location">
-                                    <span class="time">8–9</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                            <div class="lecture">
-                                <span class="lecture-name">🎯 Functional Organization of Human Body (Physiology 3)</span>
-                                <div class="time-location">
-                                    <span class="time">9–10</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                            <div class="lecture">
-                                <span class="lecture-name">⚖️ Homeostasis (Physiology 4)</span>
-                                <div class="time-location">
-                                    <span class="time">10–11</span>
-                                    <span class="location">🏢 ${hall}</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="success-message">
+                        <p>✅ تم إنشاء جدولك الشخصي بنجاح!</p>
+                        <p>🔔 لا تنس حفظ هذه المعلومات أو أخذ لقطة شاشة للرجوع إليها لاحقاً</p>
                     </div>
-                </div>
+                `;
+            } else {
+                // عرض رسالة للأسابيع الأخرى
+                html = `
+                    <div class="student-info">
+                        <h3>🎯 معلومات الطالب رقم ${number}</h3>
+                        <p><strong>المجموعة:</strong> ${group} | <strong>السكشن:</strong> ${section} | <strong>الأسبوع:</strong> ${getWeekName(selectedWeek)}</p>
+                    </div>
 
-                <div class="success-message">
-                    <p>✅ تم إنشاء جدولك الشخصي بنجاح!</p>
-                    <p>🔔 لا تنس حفظ هذه المعلومات أو أخذ لقطة شاشة للرجوع إليها لاحقاً</p>
-                </div>
-            `;
+                    <div class="error">
+                        📅 بيانات ${getWeekName(selectedWeek)} غير متوفرة حالياً
+                        <br><small style="opacity: 0.8; margin-top: 10px; display: block;">سيتم إضافة البيانات قريباً، يرجى المحاولة لاحقاً</small>
+                    </div>
+                `;
+            }
 
             resultDiv.innerHTML = html;
             resultDiv.style.display = 'block';
